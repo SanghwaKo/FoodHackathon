@@ -13,6 +13,7 @@ public class ShowStepsActivity extends FragmentActivity{
     //Voice Recognition
     private static final int SPEECH_REQUEST_CODE = 0;
     private Recipe mRecipe;
+    private FoodApplication mApplication;
 
     //UI Components
     private StepFragment mStepFragment;
@@ -21,6 +22,9 @@ public class ShowStepsActivity extends FragmentActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        int position = getIntent().getIntExtra(Constant.TAG_RECIPE, 0);
+        mRecipe = mApplication.getRecipes().get(position);
         displaySpeechRecognizer();
 
         if(findViewById(R.id.fragment_step) != null){
@@ -47,6 +51,11 @@ public class ShowStepsActivity extends FragmentActivity{
             String spokenText = results.get(0);
             // Do something with spokenText
 
+            if(isPrevious(spokenText)){
+                onBack();
+            }else if(isNext(spokenText)){
+                onNext();
+            }
             Toast.makeText(getApplicationContext(), "Spoken " + spokenText, Toast.LENGTH_LONG).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -76,5 +85,25 @@ public class ShowStepsActivity extends FragmentActivity{
 
     private void changeScene(int currentScene){
 
+    }
+
+
+
+    private boolean isPrevious(String command){
+        for(int i=0; i<Constant.ARR_BACK.length; i++){
+            if(Constant.ARR_BACK[i].equals(command)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isNext(String command){
+        for(int i=0; i<Constant.ARR_NEXT.length; i++){
+            if(Constant.ARR_NEXT[i].equals(command)){
+                return true;
+            }
+        }
+        return false;
     }
 }
