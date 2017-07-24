@@ -3,4 +3,7 @@
     <string name="recipe">Recipe</string>
     <string name="next">NEXT</string>
     <string name="back">BACK</string>
+    <string name="start">Cooking Start</string>
+    <string name="steps">( %%CC/%%TT )</string>
+    <string name="duration">( Duration : %%DD mins)</string>
 </resources>

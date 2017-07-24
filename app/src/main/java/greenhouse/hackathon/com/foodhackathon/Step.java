@@ -6,7 +6,15 @@ package greenhouse.hackathon.com.foodhackathon;
 
 public class Step{
     private String instruction;
-    private String imgUrl;
+    private int duration;
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
     public String getInstruction() {
         return instruction;
@@ -14,13 +22,5 @@ public class Step{
 
     public void setInstruction(String instruction) {
         this.instruction = instruction;
-    }
-
-    public String getImgUrl() {
-        return imgUrl;
-    }
-
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
     }
 }

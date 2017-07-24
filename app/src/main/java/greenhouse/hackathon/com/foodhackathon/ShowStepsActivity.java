@@ -1,37 +1,66 @@
 package greenhouse.hackathon.com.foodhackathon;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.speech.RecognizerIntent;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 
-public class ShowStepsActivity extends FragmentActivity{
+public class ShowStepsActivity extends Activity implements View.OnTouchListener{
+    private static final String TAG = "ShowStepsActivity";
     //Voice Recognition
     private static final int SPEECH_REQUEST_CODE = 0;
+    private TextToSpeech mTTS;
+
     private Recipe mRecipe;
     private FoodApplication mApplication;
+    private LinearLayout mLayoutStep;
 
     //UI Components
-    private StepFragment mStepFragment;
+    private TextView mTxtInstruction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.step_view);
+
+        mTTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status == TextToSpeech.SUCCESS){
+                    int result = mTTS.setLanguage(Locale.US);
+                    if(result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
+                        if(Debug.DEBUG){
+                            Log.e(TAG, "Not supported language");
+                        }
+                    }
+
+                }else{
+                    if(Debug.DEBUG){
+                        Log.e(TAG, "TTS was not initialized");
+                    }
+                }
+            }
+        });
+
+        mTxtInstruction = (TextView)findViewById(R.id.instruction_of_step);
+        mLayoutStep = (LinearLayout)findViewById(R.id.layout_step);
+        mLayoutStep.setOnTouchListener(this);
+
+        mApplication = FoodApplication.getInstance();
 
         int position = getIntent().getIntExtra(Constant.TAG_RECIPE, 0);
-        mRecipe = mApplication.getRecipes().get(position);
-        displaySpeechRecognizer();
-
-        if(findViewById(R.id.fragment_step) != null){
-            if(savedInstanceState != null){
-                return;
-            }
-        }
+        mRecipe = mApplication.getRecipe(position);
+        changeScene();
     }
 
     // Create an intent that can start the speech recognizer activity
@@ -53,11 +82,16 @@ public class ShowStepsActivity extends FragmentActivity{
 
             if(isPrevious(spokenText)){
                 onBack();
-            }else if(isNext(spokenText)){
+            }
+            if(isNext(spokenText)){
                 onNext();
             }
-            Toast.makeText(getApplicationContext(), "Spoken " + spokenText, Toast.LENGTH_LONG).show();
+
+            if(Debug.DEBUG){
+                Log.d(TAG, "spoken... " + spokenText);
+            }
         }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -68,7 +102,7 @@ public class ShowStepsActivity extends FragmentActivity{
     private void onBack(){
         if(mRecipe.getCurrentStep() > 0){
             mRecipe.decreaseStep();
-            changeScene(mRecipe.getCurrentStep());
+            changeScene();
         }
     }
 
@@ -77,21 +111,28 @@ public class ShowStepsActivity extends FragmentActivity{
     }
 
     private void onNext(){
+
         if(mRecipe.getCurrentStep() < mRecipe.getSteps().size() - 1){
             mRecipe.increaseStep();
-            changeScene(mRecipe.getCurrentStep());
+            changeScene();
         }
     }
 
-    private void changeScene(int currentScene){
+    private void changeScene(){
+        String instruction = mRecipe.getStep(mRecipe.getCurrentStep()).getInstruction();  // To show and to tell via TTS
+        mTxtInstruction.setText(instruction + "\n" +
+                getResources().getString(R.string.steps).replace("%%CC", "" + (mRecipe.getCurrentStep() + 1))
+                        .replace("%%TT", mRecipe.getSteps().size() + ""));
 
+        speak(instruction);
+        // TTS
     }
 
 
 
     private boolean isPrevious(String command){
         for(int i=0; i<Constant.ARR_BACK.length; i++){
-            if(Constant.ARR_BACK[i].equals(command)){
+            if(Constant.ARR_BACK[i].contains(command.toLowerCase())){
                 return true;
             }
         }
@@ -100,10 +141,28 @@ public class ShowStepsActivity extends FragmentActivity{
 
     private boolean isNext(String command){
         for(int i=0; i<Constant.ARR_NEXT.length; i++){
-            if(Constant.ARR_NEXT[i].equals(command)){
+            if(Constant.ARR_NEXT[i].contains(command.toLowerCase())){
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                displaySpeechRecognizer();
+                break;
+        }
+        return false;
+    }
+
+    private void speak(String msg){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            mTTS.speak(msg, TextToSpeech.QUEUE_FLUSH, null, null);
+        }else{
+            mTTS.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+        }
     }
 }

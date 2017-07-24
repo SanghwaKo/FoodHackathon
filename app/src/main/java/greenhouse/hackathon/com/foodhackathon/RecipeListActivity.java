@@ -1,18 +1,15 @@
 package greenhouse.hackathon.com.foodhackathon;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.AdapterView;
 
 /**
  * Created by KSH on 2017-07-21.
  */
 
-public class RecipeListActivity extends Activity implements AdapterView.OnItemClickListener{
+public class RecipeListActivity extends Activity{
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -22,7 +19,7 @@ public class RecipeListActivity extends Activity implements AdapterView.OnItemCl
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.list_view);
+        setContentView(R.layout.food_list_view);
 
         mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
 
@@ -33,17 +30,8 @@ public class RecipeListActivity extends Activity implements AdapterView.OnItemCl
 
         mApplication = FoodApplication.getInstance();
 
-        mAdapter = new ListAdapter(mApplication.getRecipes());
+        mAdapter = new ListAdapter(this, Constant.ARR_COLOR, mApplication.getRecipes());
+
         mRecyclerView.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(RecipeListActivity.this, ShowStepsActivity.class);
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(Constant.TAG_RECIPE, position);
-        startActivity(intent);
-
     }
 }

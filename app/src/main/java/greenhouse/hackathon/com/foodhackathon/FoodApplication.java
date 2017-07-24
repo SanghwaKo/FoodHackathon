@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class FoodApplication extends Application {
     private static FoodApplication INSTANCE = null;
-    private ArrayList<Recipe> mRecipes;
+    private ArrayList<Recipe> mRecipes = new ArrayList<>();
 
     // Singleton
     public static synchronized FoodApplication getInstance(){
@@ -22,13 +22,6 @@ public class FoodApplication extends Application {
 
     public void onCreate(){
         super.onCreate();
-
-        mRecipes = new ArrayList<>();
-        setRecipes();
-    }
-
-    public void setRecipes(){
-        //
     }
 
     public void addRecipe(Recipe recipe){
