@@ -10,3 +10,5 @@ When the voice-recognition dialog pops up just say "Next/After" or "Back/Previou
 Then you can get the next/previous step's instruction.
 
 I am improving the application and I will upload continously when the app has some changes.
+
+* The application gets recipes from web. 
